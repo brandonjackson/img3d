@@ -24,26 +24,24 @@
 	<script src="js/OrbitControls.js"></script>
 
 	<script>
-		var renderer, scene, camera, pointCloud, context;
-
+		var renderer, scene, camera, pointCloud, context, material, geometry, WIDTH, HEIGHT;
 
 		// Load image, then inititalize when it is done loading
 		var loader = new THREE.ImageLoader();
 		var myImageData, pointsGeometry;
 		loader.load(
-			'img/xp.jpg',
+			'img/xp-mini.jpg',
 			function (image) {
 				var canvas = document.getElementById('raw-image');
 				context = canvas.getContext('2d');
 				context.drawImage(image, 0, 0, 100, 63);
 
 				init();
-				animate();
+				render();
 			}
 		);
 
 		function init() {
-
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 			renderer = new THREE.WebGLRenderer({
@@ -57,20 +55,18 @@
 			controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 			// point cloud geometry
-			var geometry = new THREE.Geometry();
+			geometry = new THREE.Geometry();
 
-			var WIDTH = 100;
-			var HEIGHT = 63;
+			WIDTH = 100;
+			HEIGHT = 63;
+
+			var image = context.getImageData(0, 0, WIDTH, HEIGHT);
 
 			for (var x = 0; x < WIDTH; x++) {
 				for (var y = 0; y < HEIGHT; y++) {
-					var pixel = context.getImageData(x, y, 1, 1);
-					geometry.vertices.push(
-						new THREE.Vector3(-x + WIDTH / 2, -y + HEIGHT / 2, 0)
-					);
-					var color = new THREE.Color();
-					color.setRGB(pixel.data[0] / 255.0, pixel.data[1] / 255.0, pixel.data[2] / 255.0);
-					geometry.colors.push(color);
+					var startPixel = (x * 4) + (y * 4 * WIDTH);
+					geometry.vertices.push(new THREE.Vector3(-x + WIDTH / 2, -y + HEIGHT / 2, 0));
+					geometry.colors.push(new THREE.Color(image.data[startPixel] / 255, image.data[startPixel + 1] / 255, image.data[startPixel + 2] / 255));
 				}
 			}
 
@@ -89,23 +85,10 @@
 
 		}
 
-		function animate() {
-
-			requestAnimationFrame(animate);
-
-			render();
-
-		}
-
 		function render() {
+			requestAnimationFrame(render);
 
-			// rotate
-			pointCloud.rotation.x += 0.005;
-			pointCloud.rotation.y += 0.005;
-
-			// render
 			renderer.render(scene, camera);
-
 		}
 	</script>
 </body>
