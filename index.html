@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset=utf-8>
-		<title>Img3D</title>
-		<style>
-			body { margin: 0; }
-			/*canvas { width: 100%; height: 100% }*/
-		</style>
-	</head>
-	<body>
-		<canvas id="renderer"></canvas>
-		<canvas id="raw-image" width="600" height="375"></canvas>
 
-		<script src="js/three.js"></script>
-		<!-- <script src="cloud.js"></script> -->
+<head>
+	<meta charset=utf-8>
+	<title>Img3D</title>
+	<style>
+		body {
+			margin: 0;
+		}
+		/*canvas { width: 100%; height: 100% }*/
+	</style>
+</head>
 
-		<script>
+<body>
+	<canvas id="renderer"></canvas>
+	<canvas id="raw-image" width="600" height="375"></canvas>
+
+	<!-- <script src="cloud.js"></script> -->
+	<script src="js/three.js"></script>
+	<script src="js/OrbitControls.js"></script>
+
+	<script>
 		var renderer, scene, camera, pointCloud, context;
 
 
@@ -24,10 +29,10 @@
 		var myImageData, pointsGeometry;
 		loader.load(
 			'img/xp.jpg',
-			function(image){
+			function (image) {
 				var canvas = document.getElementById('raw-image');
-				context = canvas.getContext( '2d' );
-				context.drawImage( image, 0, 0, 100, 63);
+				context = canvas.getContext('2d');
+				context.drawImage(image, 0, 0, 100, 63);
 
 				init();
 				animate();
@@ -36,63 +41,69 @@
 
 		function init() {
 
-		    scene = new THREE.Scene();
-		    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-		    renderer = new THREE.WebGLRenderer({
-		        canvas: document.getElementById("renderer")
-		    });
-		    renderer.setSize( window.innerWidth, window.innerHeight );
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+			renderer = new THREE.WebGLRenderer({
+				canvas: document.getElementById("renderer")
+			});
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-		    camera.position.z = 80;
+			camera.position.z = 80;
 
-		    // point cloud geometry		    
-		    var geometry = new THREE.Geometry();
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-			for(var x=0; x < 100; x++){
-				for(var y=0; y < 63; y++){
-					var pixel = context.getImageData(x,y,1,1);
+			// point cloud geometry
+			var geometry = new THREE.Geometry();
+
+			var WIDTH = 100;
+			var HEIGHT = 63;
+
+			for (var x = 0; x < WIDTH; x++) {
+				for (var y = 0; y < HEIGHT; y++) {
+					var pixel = context.getImageData(x, y, 1, 1);
 					geometry.vertices.push(
-						new THREE.Vector3( x,  y, 0 )
+						new THREE.Vector3(-x + WIDTH/2, -y + HEIGHT/2, 0)
 					);
 					var color = new THREE.Color();
-					color.setRGB(pixel.data[0] / 255.0, pixel.data[1]/ 255.0, pixel.data[2]/ 255.0);
+					color.setRGB(pixel.data[0] / 255.0, pixel.data[1] / 255.0, pixel.data[2] / 255.0);
 					geometry.colors.push(color);
 				}
 			}
 
-		    // material
-		    material = new THREE.PointsMaterial( {
-		        size: 1,
-		        transparent: true,
-		        opacity: 0.7,
-		        vertexColors: THREE.VertexColors
-		    } );
+			// material
+			material = new THREE.PointsMaterial({
+				size: 1.5,
+				transparent: true,
+				opacity: 0.7,
+				vertexColors: THREE.VertexColors
+			});
 
-		    // point cloud
-		    pointCloud = new THREE.Points( geometry, material );
+			// point cloud
+			pointCloud = new THREE.Points(geometry, material);
 
-		    scene.add( pointCloud );
+			scene.add(pointCloud);
 
 		}
 
 		function animate() {
 
-		    requestAnimationFrame( animate );
+			requestAnimationFrame(animate);
 
-		    render();
+			render();
 
 		}
 
 		function render() {
 
-		    // rotate
-		    pointCloud.rotation.x += 0.005;
-		    pointCloud.rotation.y += 0.005;
+			// rotate
+			pointCloud.rotation.x += 0.005;
+			pointCloud.rotation.y += 0.005;
 
-		    // render
-		    renderer.render( scene, camera );
+			// render
+			renderer.render(scene, camera);
 
 		}
-		</script>
-	</body>
+	</script>
+</body>
+
 </html>
