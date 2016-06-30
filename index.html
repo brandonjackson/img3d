@@ -115,9 +115,9 @@
 		var startToColorspaceAnimation = function () {
 			newPosition = copyVector3Array(originalColor);
 			for (var i = 0; i < newPosition.length; ++i) {
-				newPosition[i].x *= 50;
-				newPosition[i].y *= 50;
-				newPosition[i].z *= 50;
+				newPosition[i].x = newPosition[i].x * 100 - 50;
+				newPosition[i].y = newPosition[i].y * 100 - 50;
+				newPosition[i].z = newPosition[i].z * 100 - 50;
 			}
 			toColorspace = true;
 		}
@@ -126,9 +126,9 @@
 			alpha = 0;
 			newPosition = copyVector3Array(kanoifiedColors); // brandon's thing
 			for (var i = 0; i < newPosition.length; ++i) {
-				newPosition[i].x *= 50;
-				newPosition[i].y *= 50;
-				newPosition[i].z *= 50;
+				newPosition[i].x = newPosition[i].x * 100 - 50;
+				newPosition[i].y = newPosition[i].y * 100 - 50;
+				newPosition[i].z = newPosition[i].z * 100 - 50;
 			}
 
 			for (var i = 0; i < geometry.colors.length; ++i) {
@@ -225,6 +225,9 @@
 
 			renderer.render(scene, camera);
 		}
+		var one = startToColorspaceAnimation;
+		var two = startToColorspaceKanoisedAnimation;
+		var three = startToImageKanoisedAnimation;
 	</script>
 </body>
 
