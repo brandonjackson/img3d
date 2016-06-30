@@ -24,7 +24,7 @@
 	<script src="js/OrbitControls.js"></script>
 
 	<script>
-		var renderer, scene, camera, pointCloud, context, material, geometry, WIDTH, HEIGHT;
+		var renderer, scene, camera, pointCloud, context, material, geometry, WIDTH, HEIGHT, originalColor, originalPosition;
 
 		// Load image, then inititalize when it is done loading
 		var loader = new THREE.ImageLoader();
@@ -40,6 +40,17 @@
 				render();
 			}
 		);
+
+		var copyColorsAndPositions = function () {
+			var colors = geometry.colors;
+			originalColor = geometry.vertices;
+			originalVertices = geometry.vertices;
+			for (var i = 0; i < geometry.colors.length; ++i) {
+				originalColor[i].x = colors[i].r;
+				originalColor[i].y = colors[i].g;
+				originalColor[i].z = colors[i].b;
+			}
+		}
 
 		function init() {
 			scene = new THREE.Scene();
@@ -83,6 +94,7 @@
 
 			scene.add(pointCloud);
 
+			copyColorsAndPositions()
 		}
 
 		function render() {
