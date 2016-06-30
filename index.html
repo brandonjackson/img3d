@@ -93,13 +93,13 @@
 			var vertices = geometry.vertices;
 			originalColor = copyVector3Array(colors);
 			originalVertices = copyVector3Array(vertices);
+			kanoifiedColors = kanoifyVectors(originalColor);
 		}
 
 		var animatePoints = function (points, from, to, alpha) {
 			for (var i = 0; i < points.length; ++i) {
 				points[i].lerpVectors(from, to, alpha);
 			}
-			kanoifiedColors = kanoifyVectors(originalColor);
 		}
 
 		var startToColorspaceAnimation = function () {
