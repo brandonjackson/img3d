@@ -41,10 +41,18 @@
 			}
 		);
 
+		var vector3Array = function (amount) {
+			vector3s = [];
+			for (var i = 0; i < amount; ++i) {
+				vector3s.push(new THREE.Vector3());
+			}
+			return vector3s;
+		}
+
 		var copyColorsAndPositions = function () {
 			var colors = geometry.colors;
-			originalColor = geometry.vertices;
-			originalVertices = geometry.vertices;
+			originalColor = vector3Array(WIDTH * HEIGHT);
+			originalVertices = vector3Array(WIDTH * HEIGHT);
 			for (var i = 0; i < geometry.colors.length; ++i) {
 				originalColor[i].x = colors[i].r;
 				originalColor[i].y = colors[i].g;
