@@ -72,18 +72,27 @@
 		var vector3Array = function (amount) {
 			vector3s = [];
 			for (var i = 0; i < amount; ++i) {
-				vector3s.push(new THREE.Vector3());
+				vector3s.push(new THREE.Vector3(0,0,0));
 			}
 			return vector3s;
 		}
 
 		var copyVector3Array = function (from) {
 			var to = vector3Array(from.length);
-			console.log(from);
-			for (var i = 0; i < from.length; ++i) {
-				to[i].x = from[i].x;
-				to[i].y = from[i].y;
-				to[i].z = from[i].z;
+			if (typeof from[0].x === 'number') {
+				for (var i = 0; i < from.length; ++i) {
+					to[i].x = from[i].x;
+					to[i].y = from[i].y;
+					to[i].z = from[i].z;
+				}
+			} else {
+				for (var i = 0; i < from.length; ++i) {
+					console.log(to[i].x);
+					console.log(from[i].r);
+					to[i].x = from[i].r;
+					to[i].y = from[i].g;
+					to[i].z = from[i].b;
+				}
 			}
 			return to;
 		}
