@@ -24,7 +24,7 @@
 	<script src="js/OrbitControls.js"></script>
 
 	<script>
-		var renderer, scene, camera, pointCloud, context, material, geometry, WIDTH, HEIGHT, originalColor, originalPosition;
+		var renderer, scene, camera, pointCloud, context, material, geometry, WIDTH, HEIGHT, originalColor, originalPosition, newPosition, newColor, toColorspace, toColorspaceKanoised, toImageKanoised, alpha;
 
 		// Load image, then inititalize when it is done loading
 		var loader = new THREE.ImageLoader();
@@ -49,15 +49,44 @@
 			return vector3s;
 		}
 
+		var copyVector3Array = function (from) {
+			var to = vector3Array(from.length);
+			console.log(from);
+			for (var i = 0; i < from.length; ++i) {
+				to[i].x = from[i].x;
+				to[i].y = from[i].y;
+				to[i].z = from[i].z;
+			}
+			return to;
+		}
+
 		var copyColorsAndPositions = function () {
 			var colors = geometry.colors;
-			originalColor = vector3Array(WIDTH * HEIGHT);
-			originalVertices = vector3Array(WIDTH * HEIGHT);
-			for (var i = 0; i < geometry.colors.length; ++i) {
-				originalColor[i].x = colors[i].r;
-				originalColor[i].y = colors[i].g;
-				originalColor[i].z = colors[i].b;
+			var vertices = geometry.vertices;
+			originalColor = copyVector3Array(colors);
+			originalVertices = copyVector3Array(vertices);
+		}
+
+		var animatePoints = function (points, from, to, alpha) {
+			for (var i = 0; i < points.length; ++i) {
+				points[i].lerpVectors(from, to, alpha);
 			}
+		}
+
+		var startToColorspaceAnimation = function () {
+			newPosition = copyVector3Array(originalColor);
+			toColorspace = true;
+		}
+
+		var startToColorspaceKanoisedAnimation = function () {
+			newColor = copyVector3Array(originalColor);// brandon's thing
+			toColorspaceKanoised = true;
+
+		}
+		var startToImageKanoisedAnimation = function () {
+			newPosition = copyVector3Array(originalPosition);
+			toImageKanoised = true;
+
 		}
 
 		function init() {
@@ -103,10 +132,23 @@
 			scene.add(pointCloud);
 
 			copyColorsAndPositions()
+			alpha = 0;
 		}
 
 		function render() {
 			requestAnimationFrame(render);
+
+			if (toColorspace) {
+				alpha += 1/120;
+				animatePoints(geometry.vertices, originalPosition, newPosition, alpha);
+			} else if (toColorspaceKanoised) {
+				alpha += 1/120;
+				animatePoints(geometry.vertices, originalColor, newPosition, alpha);
+				animatePoints(geometry.colors, originalColor, newColor, alpha);
+			} else if (toImageKanoised) {
+				alpha += 1/120;
+				animatePoints(geometry.vertices, originalPosition, newPosition, alpha);
+			}
 
 			renderer.render(scene, camera);
 		}
