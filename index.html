@@ -24,7 +24,7 @@
 	<script src="js/OrbitControls.js"></script>
 
 	<script>
-		var renderer, scene, camera, pointCloud, context, material, geometry, originalColor, originalPosition,newPosition, newColor, toColorspace, toColorspaceKanoised, toImageKanoised, alpha, kanoifiedColors, key;
+		var renderer, scene, camera, pointCloud, context, material, geometry, originalColor, originalPosition,newPosition, newColor, toColorspace, toColorspaceKanoised, toImageKanoised, alpha, kanoifiedColors, kanoifiedColorPosition, key;
 
 		var WIDTH = 100;
 		var HEIGHT = 100;
@@ -101,30 +101,48 @@
 		}
 
 		var copyColorsAndPositions = function () {
-			var colors = geometry.colors;
-			var vertices = geometry.vertices;
-			originalColor = copyVector3Array(colors);
-			originalPosition = copyVector3Array(vertices);
+			originalColor = copyVector3Array(geometry.colors);
+			originalPosition = copyVector3Array(geometry.vertices);
 			kanoifiedColors = kanoifyVectors(originalColor);
 		}
 
 		var animatePoints = function (points, from, to, alpha) {
 			for (var i = 0; i < points.length; ++i) {
-				points[i].lerpVectors(from, to, alpha);
+				points[i].lerpVectors(from[i], to[i], alpha);
 			}
 		}
 
 		var startToColorspaceAnimation = function () {
 			newPosition = copyVector3Array(originalColor);
+			for (var i = 0; i < newPosition.length; ++i) {
+				newPosition[i].x *= 50;
+				newPosition[i].y *= 50;
+				newPosition[i].z *= 50;
+			}
 			toColorspace = true;
 		}
 
 		var startToColorspaceKanoisedAnimation = function () {
-			newColor = copyVector3Array(originalColor); // brandon's thing
+			alpha = 0;
+			newPosition = copyVector3Array(kanoifiedColors); // brandon's thing
+			for (var i = 0; i < newPosition.length; ++i) {
+				newPosition[i].x *= 50;
+				newPosition[i].y *= 50;
+				newPosition[i].z *= 50;
+			}
+
+			for (var i = 0; i < geometry.colors.length; ++i) {
+				geometry.colors[i].r = kanoifiedColors[i].x;
+				geometry.colors[i].g = kanoifiedColors[i].y;
+				geometry.colors[i].b = kanoifiedColors[i].z;
+			}
+
+			newColor = copyVector3Array(kanoifiedColors); // brandon's thing
 			toColorspaceKanoised = true;
 
 		}
 		var startToImageKanoisedAnimation = function () {
+			alpha = 0;
 			newPosition = copyVector3Array(originalPosition);
 			toImageKanoised = true;
 
@@ -178,22 +196,31 @@
 
 			if (toColorspace) {
 				alpha += 1 / 120;
-				console.log(geometry.vertices);
 				animatePoints(geometry.vertices, originalPosition, newPosition, alpha);
 				geometry.verticesNeedUpdate = true;
 				if (alpha > 1) {
 					toColorspace = false;
+					originalColor = copyVector3Array(newPosition);
 					console.log('done with toColorspace');
 				}
 			} else if (toColorspaceKanoised) {
 				alpha += 1 / 120;
 				animatePoints(geometry.vertices, originalColor, newPosition, alpha);
-				animatePoints(geometry.colors, originalColor, newColor, alpha);
 				geometry.verticesNeedUpdate = true;
-				geometry.colorsNeedUpdate = true;
+				if (alpha > 1) {
+					geometry.colorsNeedUpdate = true;
+					toColorspaceKanoised = false;
+					kanoifiedColorPosition = copyVector3Array(newPosition);
+					console.log('done with toColorspaceKanoised');
+				}
 			} else if (toImageKanoised) {
 				alpha += 1 / 120;
-				animatePoints(geometry.vertices, originalPosition, newPosition, alpha);
+				animatePoints(geometry.vertices, kanoifiedColorPosition, newPosition, alpha);
+				geometry.verticesNeedUpdate = true;
+				if (alpha > 1) {
+					toImageKanoised = false;
+					console.log('done with toColorspaceKanoised');
+				}
 			}
 
 			renderer.render(scene, camera);
